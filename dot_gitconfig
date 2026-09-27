@@ -1,0 +1,7 @@
+[user]
+	name = Owen Ratgen
+	email = ratgenowen@gmail.com
+[credential]
+	helper = osxkeychain
+[alias]
+	cmp = "!f() { git add . && git commit -m \"$1\" && git push; }; f"
