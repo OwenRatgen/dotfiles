@@ -1,5 +1,0 @@
-# Repo-tracking artifacts and tooling — kept in the repo, not deployed to $HOME.
-bin
-Raycast.rayconfig
-Raycast.json
-RectangleConfig.json
