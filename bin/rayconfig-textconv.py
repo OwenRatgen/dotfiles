@@ -61,10 +61,20 @@ def main():
     enc = data[12 + n:]
     iv = binascii.unhexlify(meta["encryption"]["iv"])
     salt = binascii.unhexlify(meta["encryption"]["salt"])
-    key = scrypt(get_password(), salt, 32, N=16384, r=8, p=1)
-    cipher = AES.new(key, AES.MODE_GCM, nonce=iv)
-    inner = cipher.decrypt_and_verify(enc[:-16], enc[-16:])
-    obj = json.loads(gzip.decompress(inner))
+    try:
+        key = scrypt(get_password(), salt, 32, N=16384, r=8, p=1)
+        cipher = AES.new(key, AES.MODE_GCM, nonce=iv)
+        inner = cipher.decrypt_and_verify(enc[:-16], enc[-16:])
+        obj = json.loads(gzip.decompress(inner))
+    except (ValueError, KeyError) as e:
+        # Wrong password for THIS revision (e.g. a diff across a password
+        # rotation). Emit a stable marker rather than crashing, so the other
+        # side of the diff still renders.
+        sys.stdout.write(
+            f"<<rayconfig: could not decrypt this revision "
+            f"(exportedAt {meta.get('exportedAt', '?')}); wrong password? {type(e).__name__}>>\n"
+        )
+        return
     json.dump(obj, sys.stdout, indent=2, ensure_ascii=False, sort_keys=True)
     sys.stdout.write("\n")
 
